@@ -2,6 +2,8 @@
 
 A lightweight WordPress plugin to manage and display events with custom post types, meta fields, and AJAX-powered audience filtering.
 
+![Screenshot 2025-06-25 214731](https://github.com/user-attachments/assets/cb0d957c-2479-40d1-b748-afb564b43c10)
+
 ## Features
 - Custom post type for events
 - Meta fields for address, date, time, registration link, more info link, and audience
