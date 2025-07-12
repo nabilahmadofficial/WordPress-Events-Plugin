@@ -599,7 +599,40 @@ add_action('wp_ajax_nopriv_filter_events', 'filter_events');
 function display_events_shortcode($atts = []) {
     $attributes = shortcode_atts(['limit' => -1], $atts);
     $current_date = date('Y-m-d');
-    $audience_options = ['all' => 'All', 'Industry' => 'Industry', 'Students' => 'Students', 'Educators' => 'Educators', 'Community' => 'Community'];
+    $audience_options = ['all' => 'All'];
+$audiences_found = [];
+
+$audience_meta_query = new WP_Query([
+    'post_type'  => 'event',
+    'posts_per_page' => -1,
+    'meta_key'   => '_event_date',
+    'orderby'    => 'meta_value',
+    'order'      => 'ASC',
+    'meta_query' => [
+        [
+            'key'     => '_event_date',
+            'value'   => $current_date,
+            'compare' => '>=',
+            'type'    => 'DATE'
+        ]
+    ],
+    'fields' => 'ids'
+]);
+
+if ($audience_meta_query->have_posts()) {
+    foreach ($audience_meta_query->posts as $event_id) {
+        $audiences = get_post_meta($event_id, '_event_audience', true);
+        if (is_array($audiences)) {
+            foreach ($audiences as $audience_value) {
+                $audiences_found[$audience_value] = true;
+            }
+        }
+    }
+    foreach (array_keys($audiences_found) as $aud) {
+        $audience_options[$aud] = $aud; // same label and value
+    }
+}
+
 
     $query = new WP_Query([
         'post_type' => 'event',
@@ -694,7 +727,40 @@ add_shortcode('display_events', 'display_events_shortcode');
 // Display Past Events on Frontend
 function display_past_events_shortcode() {
     $current_date = date('Y-m-d');
-    $audience_options = ['all' => 'All', 'Industry' => 'Industry', 'Students' => 'Students', 'Educators' => 'Educators', 'Community' => 'Community'];
+    $audience_options = ['all' => 'All'];
+$audiences_found = [];
+
+$audience_meta_query = new WP_Query([
+    'post_type'  => 'event',
+    'posts_per_page' => -1,
+    'meta_key'   => '_event_date',
+    'orderby'    => 'meta_value',
+    'order'      => 'DESC',
+    'meta_query' => [
+        [
+            'key'     => '_event_date',
+            'value'   => $current_date,
+            'compare' => '<',
+            'type'    => 'DATE'
+        ]
+    ],
+    'fields' => 'ids'
+]);
+
+if ($audience_meta_query->have_posts()) {
+    foreach ($audience_meta_query->posts as $event_id) {
+        $audiences = get_post_meta($event_id, '_event_audience', true);
+        if (is_array($audiences)) {
+            foreach ($audiences as $audience_value) {
+                $audiences_found[$audience_value] = true;
+            }
+        }
+    }
+    foreach (array_keys($audiences_found) as $aud) {
+        $audience_options[$aud] = $aud;
+    }
+}
+
 
     $query = new WP_Query([
         'post_type' => 'event',
@@ -771,3 +837,5 @@ function display_past_events_shortcode() {
     return ob_get_clean();
 }
 add_shortcode('display_past_events', 'display_past_events_shortcode');
+
+
